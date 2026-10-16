@@ -850,7 +850,8 @@
     const [scenarioText, setScenarioText] = useState('');
     const [startingValue, setStartingValue] = useState('');
     const [passMark, setPassMark] = useState(80);
-    const [decayInterval, setDecayInterval] = useState('90 Days');
+    const [decayDays, setDecayDays] = useState('90');
+    const decayInterval = `${decayDays || 90} Days`;
     const [owner, setOwner] = useState('');
     const [projectTitle, setProjectTitle] = useState('');
     const [projectCode, setProjectCode] = useState('');
@@ -872,7 +873,7 @@
       setProjectTitle('');
       setProjectCode('');
       setPassMark(80);
-      setDecayInterval('90 Days');
+      setDecayDays('90');
       setUploadedFiles([]);
       setElements([]);
       setSelectedElementId('');
@@ -896,7 +897,7 @@
       setScenarioText(PROJECT_PRESETS[0].text);
       setStartingValue(PROJECT_PRESETS[0].startingVal);
       setPassMark(PROJECT_PRESETS[0].passMark);
-      setDecayInterval(PROJECT_PRESETS[0].decay);
+      setDecayDays('90');
       setOwner(PROJECT_PRESETS[0].owner);
       setUploadedFiles(INITIAL_DOCUMENTS);
       setElements(DECOMPOSED_ELEMENTS);
@@ -2230,12 +2231,20 @@ Every important decision made by the system must be saved in this simple 3-step 
                   <div className="glass-card-interactive p-4 rounded-xl space-y-2">
                     <span className="font-mono text-[10px] text-emerald-700 uppercase font-bold">PARAMETER 3</span>
                     <h4 className="font-heading font-bold text-xs text-charcoal-900">Audit Review Interval</h4>
-                    <input
-                      type="text"
-                      value={decayInterval}
-                      onChange={(e) => setDecayInterval(e.target.value)}
-                      className="w-full bg-pearl border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-emerald-800 focus:outline-none focus:border-emerald-600"
-                    />
+                    <div className="relative flex items-center">
+                      <input
+                        type="number"
+                        min="1"
+                        max="365"
+                        value={decayDays}
+                        onChange={(e) => setDecayDays(e.target.value)}
+                        placeholder="90"
+                        className="w-full bg-pearl border border-slate-200 rounded-lg pl-3 pr-14 py-2 text-xs font-mono font-bold text-emerald-900 focus:outline-none focus:border-emerald-600"
+                      />
+                      <span className="absolute right-3 text-xs font-mono font-bold text-charcoal-400 pointer-events-none select-none">
+                        Days
+                      </span>
+                    </div>
                   </div>
 
                   <div className="glass-card-interactive p-4 rounded-xl space-y-2">
