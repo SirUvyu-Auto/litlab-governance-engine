@@ -1616,9 +1616,27 @@ Every important decision made by the system must be saved in this simple 3-step 
       setSelectedElementId(id);
     };
 
-    const selectedElement = elements.find(e => e.id === selectedElementId) || elements[0];
-    const rawCS = Number((selectedElement.sq * 0.46 + selectedElement.vs * 0.31 + selectedElement.c * 0.23).toFixed(1));
-    const isFloorBreached = selectedElement.sq < 20 || selectedElement.vs < 20 || selectedElement.c < 20;
+    const defaultFallbackElement = {
+      id: 'E-01',
+      variableSymbol: 'V_0',
+      name: 'Baseline Variable',
+      category: 'System Parameter',
+      tier: 'Observable',
+      sq: 80,
+      vs: 80,
+      c: 80,
+      cs: 80,
+      weight: 70,
+      desc: 'System baseline parameter awaiting project decomposition.',
+      purpose: 'Initial placeholder for custom project intake.',
+      operationalGuidance: 'Run the analysis pipeline to generate live parameters.',
+      sourceEvidence: 'Project Narrative and Ingested Documents',
+      status: 'Awaiting Pipeline Run'
+    };
+
+    const selectedElement = elements.find(e => e.id === selectedElementId) || elements[0] || defaultFallbackElement;
+    const rawCS = Number(((selectedElement.sq || 80) * 0.46 + (selectedElement.vs || 80) * 0.31 + (selectedElement.c || 80) * 0.23).toFixed(1));
+    const isFloorBreached = (selectedElement.sq || 80) < 20 || (selectedElement.vs || 80) < 20 || (selectedElement.c || 80) < 20;
     const finalCS = isFloorBreached ? Math.min(rawCS, 19.9) : rawCS;
     const isPassed = finalCS >= passMark;
 
