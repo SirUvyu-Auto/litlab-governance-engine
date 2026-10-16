@@ -865,6 +865,31 @@
     const [showTextOnlyConfirmModal, setShowTextOnlyConfirmModal] = useState(false);
     const [emptyInputWarning, setEmptyInputWarning] = useState(false);
     const fileInputRef = useRef(null);
+    const mainContentRef = useRef(null);
+
+    const scrollToTop = (smooth = true) => {
+      try {
+        if (mainContentRef.current) {
+          if (smooth) {
+            mainContentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+          } else {
+            mainContentRef.current.scrollTop = 0;
+          }
+        }
+        const el = document.getElementById('main-viewport');
+        if (el) {
+          if (smooth) {
+            el.scrollTo({ top: 0, behavior: 'smooth' });
+          } else {
+            el.scrollTop = 0;
+          }
+        }
+        window.scrollTo(0, 0);
+      } catch (e) {
+        // Fallback for older browsers
+        if (mainContentRef.current) mainContentRef.current.scrollTop = 0;
+      }
+    };
 
     // Workspace Reset & Demo Load Handlers
     const handleClearAllData = () => {
@@ -1064,6 +1089,11 @@
       return () => clearTimeout(timer);
     }, [activeTab, selectedPreset, selectedStage, selectedElementId, selectedProjectId, activeReturnStep, uploadedFiles, showSettingsModal, showRunnerModal, showDossierModal, showElementDetailDrawer, runnerStage, runnerStatus, showLogsDrawer, dossierTab, engineStatus, pipelineResults, lockedDossier, isDialsStreaming, flowEvaluatedIds, showTextOnlyConfirmModal, emptyInputWarning, governanceDecision, isDemoLoaded]);
 
+    // Auto-scroll viewport to top on tab or stage transitions
+    useEffect(() => {
+      scrollToTop(false);
+    }, [activeTab, selectedStage]);
+
     const handleSelectPreset = (p) => {
       setSelectedPreset(p);
       setScenarioText(p.text);
@@ -1185,6 +1215,7 @@
       setHasPipelineRun(true);
       setRunnerStatus('running');
       setCompletedStages([]);
+      scrollToTop(false);
 
       const timeStr = new Date().toLocaleTimeString('en-US', { hour12: false });
       setRunnerLogs([
@@ -1288,6 +1319,7 @@
       addRunnerLog(`[STAGE 4 HUMAN GATE] Halting automated execution under CP-ARCH-001 v1.6 for Named Sign-Off Owner calibration.`);
       setRunnerStatus('paused_human');
       setActiveProcessingStage(null);
+      scrollToTop(true);
 
       setAuditLog(prev => [
         `[PIPELINE PAUSED: HUMAN DECISION REQUIRED] Passes 1-3 completed for ${selectedPreset.projectCode}. Awaiting Stage 4 calibration sign-off.`,
@@ -1933,7 +1965,7 @@ Every important decision made by the system must be saved in this simple 3-step 
           </header>
 
           {/* MAIN CONTENT CONTAINER */}
-          <div className="flex-1 overflow-y-auto p-8 space-y-7">
+          <div ref={mainContentRef} id="main-viewport" className="flex-1 overflow-y-auto p-8 space-y-7">
 
             {/* TAB 1: PROJECT INTAKE & BLUEPRINTS */}
             {activeTab === 'intake' && (
