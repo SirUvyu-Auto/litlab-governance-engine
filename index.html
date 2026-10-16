@@ -2699,7 +2699,7 @@ Every important decision made by the system must be saved in this simple 3-step 
                               <th className="p-3">Why It Is Needed (Purpose)</th>
                               <th className="p-3">How The System Uses It</th>
                               <th className="p-3">Risk If Breached</th>
-                              <th className="p-3 text-right">Action</th>
+                              <th className="p-3 text-right">Status</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100">
@@ -2730,16 +2730,9 @@ Every important decision made by the system must be saved in this simple 3-step 
                                   {el.importanceRating}
                                 </td>
                                 <td className="p-3 text-right">
-                                  <button
-                                    onClick={() => {
-                                      setSelectedElementId(el.id);
-                                      setActiveTab('dials');
-                                    }}
-                                    className="px-2.5 py-1 rounded bg-white hover:bg-slate-100 border border-slate-200 text-charcoal-700 font-mono text-[10px] font-bold transition-all shadow-2xs"
-                                    title="View in Confidence Dials"
-                                  >
-                                    View Dial
-                                  </button>
+                                  <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold inline-block">
+                                    EXTRACTED
+                                  </span>
                                 </td>
                               </tr>
                             ))}
