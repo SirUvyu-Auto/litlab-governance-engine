@@ -754,57 +754,6 @@
       validationTier: 1,
       governanceLock: false,
       leadArchitect: 'Supply Chain Lead Architect'
-    },
-    {
-      id: 'P-102',
-      projectCode: 'PRJ-2026-091',
-      name: 'Core Ledger & Automated Onboarding',
-      clientOrg: 'Vanguard Capital Technologies',
-      domain: 'Event-Driven Financial Infrastructure',
-      complexityMultiplier: 2.7,
-      targetDate: '2026-10-28',
-      daysRemaining: 20,
-      proximityMultiplier: 2.0,
-      expectedValue: 405000,
-      priorityScore: 86,
-      heatTier: 'High',
-      validationTier: 1,
-      governanceLock: false,
-      leadArchitect: 'Marcus Vance (Managing Systems Partner)'
-    },
-    {
-      id: 'P-103',
-      projectCode: 'PRJ-2026-072',
-      name: 'B2B SaaS Multi-Tenant Platform Scalability',
-      clientOrg: 'Metro Cloud Networks',
-      domain: 'API Gateway & Metered Billing Hub',
-      complexityMultiplier: 2.5,
-      targetDate: '2027-01-15',
-      daysRemaining: 99,
-      proximityMultiplier: 1.4,
-      expectedValue: 223125,
-      priorityScore: 58,
-      heatTier: 'Medium',
-      validationTier: 3,
-      governanceLock: false,
-      leadArchitect: 'David Chen (Infrastructure Lead)'
-    },
-    {
-      id: 'P-104',
-      projectCode: 'PRJ-2026-061',
-      name: 'Autonomous Customer Intelligence Pipeline',
-      clientOrg: 'Sunrise Horizon Media',
-      domain: 'High-Velocity Data Ingestion',
-      complexityMultiplier: 1.5,
-      targetDate: '2027-04-10',
-      daysRemaining: 184,
-      proximityMultiplier: 1.0,
-      expectedValue: 112500,
-      priorityScore: 38,
-      heatTier: 'Standard',
-      validationTier: 4,
-      governanceLock: true,
-      leadArchitect: 'Executive Audit Board'
     }
   ];
 
@@ -1676,7 +1625,27 @@ Every important decision made by the system must be saved in this simple 3-step 
     const finalCS = isFloorBreached ? Math.min(rawCS, 19.9) : rawCS;
     const isPassed = finalCS >= passMark;
 
-    const selectedProject = READY_PROJECTS.find(p => p.id === selectedProjectId) || READY_PROJECTS[0];
+    // Dynamic Active Project (live synchronization with intake, pipeline execution, and locks)
+    const activeProject = {
+      id: 'ACTIVE-PRJ',
+      projectCode: projectCode.trim() || selectedPreset.projectCode || 'CP-PRJ-2026-001',
+      name: projectTitle.trim() || (scenarioText.trim() ? 'Custom Ingested Project Specification' : selectedPreset.title),
+      clientOrg: selectedPreset.clientOrg || (owner.trim() ? `${owner.trim()} Operations` : 'Enterprise Logistics Network'),
+      domain: selectedPreset.domain || 'Operational Process Automation',
+      complexityMultiplier: selectedPreset.complexityMultiplier || 2.1,
+      targetDate: selectedPreset.deliveryDate || '2026-11-15',
+      daysRemaining: Number(decayDays) || 37,
+      proximityMultiplier: selectedPreset.proximityMultiplier || 1.7,
+      expectedValue: activeValuation,
+      priorityScore: activePriorityScore,
+      heatTier: activePriorityScore >= 75 ? 'High' : activePriorityScore >= 50 ? 'Medium' : 'Standard',
+      validationTier: activeMasterCS >= passMark ? 1 : activeMasterCS >= (passMark - 5) ? 2 : activeMasterCS >= (passMark - 10) ? 3 : 4,
+      governanceLock: Boolean(lockedDossier),
+      leadArchitect: owner.trim() ? owner.trim() : 'Awaiting Lead Assignment'
+    };
+
+    const portfolioList = [activeProject];
+    const selectedProject = activeProject;
 
     const handleDismissWarning = () => {
       const nextWave = Math.min(waveCount + 1, 2);
@@ -4099,22 +4068,34 @@ Every important decision made by the system must be saved in this simple 3-step 
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-5 gap-3.5">
-                    {VALIDATION_TIERS.map((tier) => (
-                      <div key={tier.tier} className={`p-4 rounded-xl border space-y-2 ${tier.bgColor} ${tier.borderColor}`}>
-                        <div className="flex items-center justify-between">
-                          <span className="font-mono text-[10px] text-charcoal-500 font-bold">T-{tier.tier}</span>
-                          <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold border ${tier.badgeColor}`}>
-                            {tier.status}
-                          </span>
+                    {VALIDATION_TIERS.map((tier) => {
+                      const isActiveTier = selectedProject.validationTier === tier.tier;
+                      return (
+                        <div
+                          key={tier.tier}
+                          className={`p-4 rounded-xl border space-y-2 transition-all ${
+                            isActiveTier
+                              ? 'ring-2 ring-emerald-500 shadow-md bg-emerald-50/60 border-emerald-400 scale-[1.02]'
+                              : `${tier.bgColor} ${tier.borderColor} opacity-65`
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono text-[10px] text-charcoal-500 font-bold">T-{tier.tier}</span>
+                            <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold border ${isActiveTier ? 'bg-emerald-600 text-white border-emerald-700 animate-pulse' : tier.badgeColor}`}>
+                              {isActiveTier ? 'ACTIVE TIER' : tier.status}
+                            </span>
+                          </div>
+                          <h4 className="font-heading font-bold text-xs text-charcoal-900 leading-tight">{tier.name}</h4>
+                          <div className={`text-[10px] font-mono p-2 rounded-lg border ${isActiveTier ? 'bg-white border-emerald-300 text-emerald-950 font-semibold' : 'bg-white border-slate-200 text-charcoal-700'}`}>
+                            <span className={`block text-[8px] uppercase ${isActiveTier ? 'text-emerald-700 font-bold' : 'text-charcoal-400'}`}>
+                              {isActiveTier ? 'QUALIFIED RULE' : 'RULE CONDITION'}
+                            </span>
+                            {tier.condition}
+                          </div>
+                          <p className="text-[10px] text-charcoal-600 leading-snug">{tier.action}</p>
                         </div>
-                        <h4 className="font-heading font-bold text-xs text-charcoal-900 leading-tight">{tier.name}</h4>
-                        <div className="text-[10px] font-mono text-charcoal-700 bg-white p-2 rounded-lg border border-slate-200">
-                          <span className="text-charcoal-400 block text-[8px] uppercase">RULE CONDITION</span>
-                          {tier.condition}
-                        </div>
-                        <p className="text-[10px] text-charcoal-600 leading-snug">{tier.action}</p>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -4127,29 +4108,27 @@ Every important decision made by the system must be saved in this simple 3-step 
                         <i data-lucide="flame" className="w-4 h-4 text-amber-600"></i>
                         <span>Active Portfolio Projects</span>
                       </h3>
-                      <span className="text-[10px] font-mono text-maroon-800">4 Active Projects</span>
+                      <span className="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">1 Live Project</span>
                     </div>
 
                     <div className="space-y-3">
-                      {READY_PROJECTS.map((prj) => {
-                        const isSel = prj.id === selectedProjectId;
-
+                      {portfolioList.map((prj) => {
                         return (
-                          <button
+                          <div
                             key={prj.id}
-                            onClick={() => setSelectedProjectId(prj.id)}
-                            className={`w-full p-4 rounded-xl text-left border transition-all space-y-2.5 ${
-                              isSel
-                                ? 'bg-white border-maroon-600 shadow-md ring-1 ring-maroon-600/30'
-                                : 'bg-white border-slate-200 hover:border-slate-300'
-                            }`}
+                            className="w-full p-4 rounded-xl text-left border bg-white border-maroon-600 shadow-md ring-1 ring-maroon-600/30 space-y-2.5"
                           >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-2">
                                 <span className="font-mono text-[10px] text-maroon-800 font-bold">{prj.projectCode}</span>
-                                {prj.governanceLock && (
-                                  <span className="px-1.5 py-0.5 rounded text-[8px] font-mono font-bold bg-red-100 text-red-800 border border-red-300">
-                                    GOVERNANCE HOLD
+                                {prj.governanceLock ? (
+                                  <span className="px-1.5 py-0.5 rounded text-[8px] font-mono font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center space-x-1">
+                                    <i data-lucide="lock" className="w-2.5 h-2.5"></i>
+                                    <span>LOCKED &amp; CERTIFIED</span>
+                                  </span>
+                                ) : (
+                                  <span className="px-1.5 py-0.5 rounded text-[8px] font-mono font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                                    IN EVALUATION
                                   </span>
                                 )}
                               </div>
@@ -4174,7 +4153,7 @@ Every important decision made by the system must be saved in this simple 3-step 
                               <span className="text-emerald-800 font-semibold">Value: ${prj.expectedValue.toLocaleString()}</span>
                               <span>Target: {prj.daysRemaining} Days</span>
                             </div>
-                          </button>
+                          </div>
                         );
                       })}
                     </div>
@@ -4207,11 +4186,11 @@ Every important decision made by the system must be saved in this simple 3-step 
 
                     {/* GOVERNANCE HOLD ALERT IF ACTIVE */}
                     {selectedProject.governanceLock && (
-                      <div className="bg-red-50 border border-red-300 rounded-xl p-4 flex items-center space-x-3 text-red-900 font-mono text-xs">
-                        <i data-lucide="lock" className="w-5 h-5 text-red-700 flex-shrink-0"></i>
+                      <div className="bg-emerald-50 border border-emerald-300 rounded-xl p-4 flex items-center space-x-3 text-emerald-950 font-mono text-xs">
+                        <i data-lucide="lock" className="w-5 h-5 text-emerald-700 flex-shrink-0"></i>
                         <div>
-                          <span className="font-bold block uppercase text-red-800 text-[10px]">GOVERNANCE LOCK ACTIVE</span>
-                          Project requires executive sign-off prior to milestone transition (Status: Pending Review).
+                          <span className="font-bold block uppercase text-emerald-800 text-[10px]">GOVERNANCE LOCK ACTIVE &bull; CERTIFIED SPECIFICATION</span>
+                          Project specification sealed under CP-ARCH-001 v1.6. Approved by {selectedProject.leadArchitect}.
                         </div>
                       </div>
                     )}
@@ -4233,7 +4212,7 @@ Every important decision made by the system must be saved in this simple 3-step 
                       <div className="bg-pearl p-3.5 rounded-xl border border-slate-200 space-y-1">
                         <span className="text-[9px] text-charcoal-400 block uppercase">EST. VALUE (EAV)</span>
                         <span className="text-emerald-800 font-bold text-sm block">${selectedProject.expectedValue.toLocaleString()}</span>
-                        <span className="text-charcoal-400 text-[9px]">Base: $75,000</span>
+                        <span className="text-charcoal-400 text-[9px]">Base: {startingValue ? startingValue : '$185,000'}</span>
                       </div>
 
                       <div className="bg-pearl p-3.5 rounded-xl border border-slate-200 space-y-1">
@@ -4251,7 +4230,7 @@ Every important decision made by the system must be saved in this simple 3-step 
                       <div className="font-mono text-xs bg-white p-4 rounded-xl border border-slate-200 space-y-2 text-charcoal-700">
                         <div className="flex justify-between">
                           <span className="text-charcoal-400">Base Milestone Baseline (V₀):</span>
-                          <span className="text-charcoal-900 font-bold">$75,000</span>
+                          <span className="text-charcoal-900 font-bold">{startingValue ? startingValue : '$185,000 Annual Savings Baseline'}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-charcoal-400">Complexity Multiplier:</span>
@@ -4263,7 +4242,7 @@ Every important decision made by the system must be saved in this simple 3-step 
                         </div>
                         <div className="flex justify-between">
                           <span className="text-charcoal-400">Variance Buffer Factor:</span>
-                          <span className="text-amber-700 font-bold">0.85 (15% Contingency)</span>
+                          <span className="text-amber-700 font-bold">0.85 (15% Contingency applied)</span>
                         </div>
                         <div className="pt-2 border-t border-slate-200 flex justify-between text-emerald-800 font-bold text-sm">
                           <span>Calculated EAV:</span>
@@ -4273,14 +4252,22 @@ Every important decision made by the system must be saved in this simple 3-step 
                     </div>
 
                     {/* DISPATCH ACTION */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-maroon-50 border border-maroon-200 rounded-xl">
+                    <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border ${
+                      selectedProject.governanceLock
+                        ? 'bg-emerald-50 border-emerald-200'
+                        : 'bg-maroon-50 border-maroon-200'
+                    }`}>
                       <div className="flex items-center space-x-3">
-                        <div className="w-9 h-9 rounded-lg bg-maroon-100 flex items-center justify-center text-maroon-800 shrink-0">
-                          <i data-lucide="send" className="w-4 h-4"></i>
+                        <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                          selectedProject.governanceLock ? 'bg-emerald-100 text-emerald-800' : 'bg-maroon-100 text-maroon-800'
+                        }`}>
+                          <i data-lucide={selectedProject.governanceLock ? 'check-circle-2' : 'send'} className="w-4 h-4"></i>
                         </div>
                         <div>
                           <span className="font-heading font-bold text-xs text-charcoal-900 block">
-                            {selectedProject.heatTier === 'High'
+                            {selectedProject.governanceLock
+                              ? 'DISPATCH IMMEDIATE ENGINEERING SPRINT SQUAD (SPECIFICATION LOCKED)'
+                              : selectedProject.heatTier === 'High'
                               ? 'DISPATCH IMMEDIATE ENGINEERING SPRINT SQUAD'
                               : 'QUEUE FOR SCHEDULED MILESTONE EXECUTION'}
                           </span>
@@ -4291,13 +4278,17 @@ Every important decision made by the system must be saved in this simple 3-step 
                       </div>
 
                       <button
-                        disabled={selectedProject.governanceLock}
-                        onClick={() => alert(`Sprint squad assigned to ${selectedProject.name}. Lead Architect: ${selectedProject.leadArchitect}`)}
-                        className={`glow-button px-4 py-2.5 rounded-xl font-heading font-bold text-xs uppercase tracking-wider flex items-center justify-center space-x-2 shrink-0 self-start sm:self-auto ${
-                          selectedProject.governanceLock ? 'opacity-50 cursor-not-allowed' : ''
-                        }`}
+                        onClick={() => {
+                          if (selectedProject.governanceLock) {
+                            alert(`Engineering sprint squad dispatched for ${selectedProject.name}. Signed-Off Lead: ${selectedProject.leadArchitect}`);
+                          } else {
+                            setActiveTab('loop');
+                            scrollToTop(true);
+                          }
+                        }}
+                        className="glow-button px-4 py-2.5 rounded-xl font-heading font-bold text-xs uppercase tracking-wider flex items-center justify-center space-x-2 shrink-0 self-start sm:self-auto"
                       >
-                        <span>{selectedProject.governanceLock ? 'LOCKED' : 'DISPATCH TEAM'}</span>
+                        <span>{selectedProject.governanceLock ? 'DISPATCH TEAM' : 'PROCEED TO LOCK &rarr;'}</span>
                         <i data-lucide="arrow-right" className="w-4 h-4"></i>
                       </button>
                     </div>
