@@ -304,7 +304,7 @@
       startingVal: '$185,000 Annual Savings Baseline',
       passMark: 80,
       decay: '90 Days',
-      owner: 'Kris Davis (Parameter Owner, College Produce)',
+      owner: '',
       deliveryDate: '2026-11-15',
       daysUntil: 37,
       proximityMultiplier: 1.6,
@@ -326,7 +326,7 @@
       verified: true,
       previewCategory: 'System Functional Specification',
       previewDate: '2026-10-08 14:30 UTC',
-      previewSignOff: 'Kris Davis, Parameter Owner',
+      previewSignOff: 'Lead Architect (Supply Chain)',
       previewSections: [
         {
           title: '1. Executive Purpose & Scope',
@@ -753,7 +753,7 @@
       heatTier: 'High',
       validationTier: 1,
       governanceLock: false,
-      leadArchitect: 'Kris Davis (Supply Chain Lead Architect)'
+      leadArchitect: 'Supply Chain Lead Architect'
     },
     {
       id: 'P-102',
@@ -855,6 +855,7 @@
     const [owner, setOwner] = useState('');
     const [projectTitle, setProjectTitle] = useState('');
     const [projectCode, setProjectCode] = useState('');
+    const [isDemoLoaded, setIsDemoLoaded] = useState(false);
 
     // File Ingestion State (Clean by Default)
     const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -887,6 +888,7 @@
       setRunnerProgress(0);
       setRunnerLogs([]);
       setEmptyInputWarning(false);
+      setIsDemoLoaded(false);
       setAuditLog(prev => ['[WORKSPACE RESET] All pinned test data cleared. Ready for fresh project ingestion.', ...prev]);
     };
 
@@ -903,6 +905,7 @@
       setElements(DECOMPOSED_ELEMENTS);
       setSelectedElementId('E-01');
       setEmptyInputWarning(false);
+      setIsDemoLoaded(true);
       setAuditLog(prev => ['[DEMO LOADED] Loaded College Produce demo specification and documents.', ...prev]);
     };
 
@@ -1059,14 +1062,14 @@
         }
       }, 50);
       return () => clearTimeout(timer);
-    }, [activeTab, selectedPreset, selectedStage, selectedElementId, selectedProjectId, activeReturnStep, uploadedFiles, showSettingsModal, showRunnerModal, showDossierModal, showElementDetailDrawer, runnerStage, runnerStatus, showLogsDrawer, dossierTab, engineStatus, pipelineResults, lockedDossier, isDialsStreaming, flowEvaluatedIds, showTextOnlyConfirmModal, emptyInputWarning, governanceDecision]);
+    }, [activeTab, selectedPreset, selectedStage, selectedElementId, selectedProjectId, activeReturnStep, uploadedFiles, showSettingsModal, showRunnerModal, showDossierModal, showElementDetailDrawer, runnerStage, runnerStatus, showLogsDrawer, dossierTab, engineStatus, pipelineResults, lockedDossier, isDialsStreaming, flowEvaluatedIds, showTextOnlyConfirmModal, emptyInputWarning, governanceDecision, isDemoLoaded]);
 
     const handleSelectPreset = (p) => {
       setSelectedPreset(p);
       setScenarioText(p.text);
       setStartingValue(p.startingVal);
       setPassMark(p.passMark);
-      setDecayInterval(p.decay);
+      setDecayDays((p.decay || '90').replace(/[^0-9]/g, '') || '90');
       setOwner(p.owner);
       setPipelineResults(null);
       setLockedDossier(null);
@@ -1946,23 +1949,25 @@ Every important decision made by the system must be saved in this simple 3-step 
                   </div>
 
                   <div className="flex items-center space-x-2.5 self-start md:self-auto shrink-0">
-                    <button
-                      onClick={handleClearAllData}
-                      className="px-3.5 py-2 rounded-xl bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-300 text-charcoal-700 hover:text-rose-700 font-heading font-bold text-xs tracking-wider uppercase flex items-center space-x-1.5 shadow-2xs transition-all"
-                      title="Clear all fields and start fresh"
-                    >
-                      <i data-lucide="trash-2" className="w-3.5 h-3.5 text-rose-600"></i>
-                      <span>Clear All Pinned Data</span>
-                    </button>
-
-                    <button
-                      onClick={handleLoadDemoData}
-                      className="px-3.5 py-2 rounded-xl bg-pearl hover:bg-maroon-50 border border-slate-200 hover:border-maroon-200 text-maroon-900 font-heading font-bold text-xs tracking-wider uppercase flex items-center space-x-1.5 shadow-2xs transition-all"
-                      title="Load College Produce Demo Data"
-                    >
-                      <i data-lucide="sparkles" className="w-3.5 h-3.5 text-maroon-700"></i>
-                      <span>Load College Produce Demo</span>
-                    </button>
+                    {isDemoLoaded ? (
+                      <button
+                        onClick={handleClearAllData}
+                        className="px-3.5 py-2 rounded-xl bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-300 text-charcoal-700 hover:text-rose-700 font-heading font-bold text-xs tracking-wider uppercase flex items-center space-x-1.5 shadow-2xs transition-all"
+                        title="Clear demo data and start fresh"
+                      >
+                        <i data-lucide="trash-2" className="w-3.5 h-3.5 text-rose-600"></i>
+                        <span>Clear Demo</span>
+                      </button>
+                    ) : (
+                      <button
+                        onClick={handleLoadDemoData}
+                        className="px-3.5 py-2 rounded-xl bg-pearl hover:bg-maroon-50 border border-slate-200 hover:border-maroon-200 text-maroon-900 font-heading font-bold text-xs tracking-wider uppercase flex items-center space-x-1.5 shadow-2xs transition-all"
+                        title="Load demo data"
+                      >
+                        <i data-lucide="sparkles" className="w-3.5 h-3.5 text-maroon-700"></i>
+                        <span>Load Demo</span>
+                      </button>
+                    )}
                   </div>
                 </div>
 

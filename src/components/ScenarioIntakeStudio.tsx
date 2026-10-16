@@ -15,7 +15,7 @@ const PRESETS: ScenarioPreset[] = [
     startingValue: '45 min',
     passMark: 80,
     decayInterval: '90 Days',
-    owner: 'Kris Davis'
+    owner: 'Lead Paralegal'
   },
   {
     id: 'onboarding',
